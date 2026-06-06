@@ -1,3 +1,19 @@
+# Web + task framework
 fastapi
 uvicorn[standard]
 pydantic-settings
+celery
+redis
+httpx
+
+# Config / data
+pyyaml
+numpy
+pillow
+imageio
+scikit-image
+tqdm
+
+# NOTE: torch + torchvision are installed separately (CPU vs CUDA wheel) via the
+# Dockerfile / dev command:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/${TORCH_INDEX:-cpu}

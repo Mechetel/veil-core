@@ -1,6 +1,6 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 
-from .auth import require_token
+from app.api import steganalysis, steganography
 
 app = FastAPI(title="Veil Core")
 
@@ -11,7 +11,5 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/", dependencies=[Depends(require_token)])
-def root() -> dict[str, str]:
-    """Token-protected hello endpoint."""
-    return {"message": "hello"}
+app.include_router(steganography.router)
+app.include_router(steganalysis.router)
