@@ -1,3 +1,4 @@
 # See https://git-scm.com/docs/gitattributes for more about git attribute files.
 
-docker/secret-envs/* filter=git-crypt diff=git-crypt
+docker/secret-envs/*production.env filter=git-crypt diff=git-crypt
+docker/secret-envs/docker-hub.env filter=git-crypt diff=git-crypt
