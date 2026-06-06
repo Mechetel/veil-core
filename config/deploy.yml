@@ -1,0 +1,43 @@
+<%
+  require "dotenv"
+  Dotenv.load("docker/secret-envs/docker-hub.env")
+  Dotenv.load("docker/secret-envs/veil-core-production.env")
+%>
+
+# Name of your application. Used to uniquely configure containers.
+service: veil-core
+
+# Name of the container image.
+image: mechetel/veil-core
+
+# Deploy to these servers.
+servers:
+  web:
+    - XXX.XXX.XXX.XXX
+
+# Enable SSL auto certification via Let's Encrypt and configure the healthcheck.
+# proxy:
+#   ssl: true
+#   hosts:
+#     - veil-core.example.com
+
+# Credentials for your image host.
+registry:
+  username: mechetel
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+# Inject ENV variables into containers (secrets come from .kamal/secrets).
+env:
+  secret:
+    - VEIL_CORE_TOKEN
+
+# Aliases are triggered with "kamal <alias>".
+aliases:
+  logs: app logs -f
+  shell: app exec --interactive --reuse "bash"
+
+# Configure the image builder.
+builder:
+  arch: amd64
+  dockerfile: docker/dockerfiles/prod.Dockerfile

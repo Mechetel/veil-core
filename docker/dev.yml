@@ -1,0 +1,13 @@
+services:
+  core:
+    build:
+      context: dockerfiles
+      dockerfile: be.Dockerfile
+    container_name: veil-core
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - secret-envs/veil-core.env
+    ports:
+      - 8000:8000
+    volumes:
+      - ..:/app
