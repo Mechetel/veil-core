@@ -53,7 +53,7 @@ class DecoderService:
         ValueError        : if no valid message is found
         """
         if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Stego image not found: {image_path!r}")
+            raise FileNotFoundError(f"Stego image not found: {os.path.basename(image_path)!r}")
 
         image = imread(image_path, pilmode="RGB") / 255.0
         image = (
@@ -73,7 +73,7 @@ class DecoderService:
                 candidates[text] += 1
 
         if not candidates:
-            raise ValueError(f"No valid message found in {image_path!r}.")
+            raise ValueError(f"No valid message found in {os.path.basename(image_path)!r}.")
 
         message, count = candidates.most_common(1)[0]
 

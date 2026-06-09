@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Start veil-core without Docker: FastAPI (uvicorn) + both Celery workers, all in
+# one terminal — the Python equivalent of veil-web's `bin/dev`.
+#
+# Requires a local Redis on localhost:6379 (e.g. `brew services start redis`).
+# Tokens + localhost wiring are loaded from docker/secret-envs + docker/envs by
+# app/config.py, so no env exports are needed.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# First run (or incomplete venv): create the venv and install deps incl. the CPU
+# torch wheel. Keyed on a marker so a partially-built venv is completed.
+if [ ! -f .venv/.deps-installed ]; then
+  echo "→ Setting up .venv (installs torch — takes a minute)…"
+  python3.12 -m venv .venv
+  .venv/bin/pip install -q --upgrade pip
+  .venv/bin/pip install -q -r requirements-dev.txt
+  .venv/bin/pip install -q torch torchvision
+  touch .venv/.deps-installed
+fi
+
+# Soft check: warn if Redis isn't up (workers/broker need it).
+if ! (exec 3<>/dev/tcp/localhost/6379) 2>/dev/null; then
+  echo "⚠️  Redis not reachable on localhost:6379 — start it first:"
+  echo "    brew services start redis    # or: docker run -p 6379:6379 redis:7"
+fi
+
+exec .venv/bin/honcho start -f Procfile.dev

@@ -26,4 +26,6 @@ def client():
 
 @pytest.fixture
 def auth():
-    return {"X-Auth-Token": "dev-token"}
+    from app.config import settings
+
+    return {"X-Auth-Token": settings.veil_core_token}

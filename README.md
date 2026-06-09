@@ -43,16 +43,17 @@ In production `weights/` is a persistent volume; push it with
 
 ## Run
 
-### 1. Bare (venv)
+### 1. Bare (no Docker) — `bin/dev`
+Like veil-web's `bin/dev`: starts uvicorn + both Celery workers in one terminal
+(via honcho). First run creates `.venv` and installs deps incl. the CPU torch wheel.
+Needs a local Redis and reads tokens/wiring from `docker/secret-envs` + `docker/envs`
+automatically (no env exports).
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-# needs a local redis (brew services start redis)
-VEIL_CORE_TOKEN=dev-veil-token .venv/bin/uvicorn app.main:app --reload --port 8000
-.venv/bin/celery -A app.celery_app worker -Q steg -l info       # in another shell
-.venv/bin/celery -A app.celery_app worker -Q analysis -l info   # in another shell
+brew services start redis      # or: docker run -p 6379:6379 redis:7
+bin/dev                        # → uvicorn :8000  +  steg worker  +  analysis worker
 ```
+Manual equivalent (separate shells): `.venv/bin/uvicorn app.main:app --reload --port 8000`,
+`.venv/bin/celery -A app.celery_app worker -Q steg -l info`, `… -Q analysis …`.
 
 ### 2. Docker Compose (dev) — redis + api + both workers
 ```bash

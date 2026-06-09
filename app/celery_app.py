@@ -18,6 +18,8 @@ celery.conf.update(
     result_serializer="json",
     accept_content=["json"],
     result_expires=3600,
+    # Keep retrying the Redis broker on worker startup (e.g. redis not up yet).
+    broker_connection_retry_on_startup=True,
     # Each domain has its own queue + worker role.
     task_routes={
         "app.tasks.steganography.*": {"queue": "steg"},

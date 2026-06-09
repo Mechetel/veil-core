@@ -5,8 +5,6 @@ __pycache__/
 venv/
 *.egg-info/
 
-/.env*
-
 # Model weights — synced separately to a persistent volume (see
 # scripts/collect_weights.py + scripts/sync_weights_to_server.sh). Not baked into images.
 /weights/

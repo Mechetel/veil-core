@@ -9,10 +9,13 @@ replaced by a harmless stub, then place the encoder/decoder on the target device
 """
 from __future__ import annotations
 
+import logging
 import pickle
 import types
 
 import torch
+
+log = logging.getLogger(__name__)
 
 
 class _Stub:
@@ -41,7 +44,13 @@ class _Unpickler(pickle.Unpickler):
             return _Stub
         try:
             return super().find_class(module, name)
-        except (ModuleNotFoundError, AttributeError):
+        except (ModuleNotFoundError, AttributeError) as exc:
+            # Surface this loudly: a missing dependency would otherwise silently
+            # stub a real object (e.g. the inference services), making encode a no-op.
+            log.warning(
+                "Stubbing %s.%s during checkpoint load (%s) — install missing deps if this is not a training-only class.",
+                module, name, exc,
+            )
             return _Stub
 
 

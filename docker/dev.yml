@@ -12,6 +12,16 @@ x-core: &core
   env_file:
     - secret-envs/veil-core.env
     - envs/core-dev.env
+  # Docker-specific overrides of the localhost dev wiring (take precedence over
+  # env_file): reach redis by service name, the host's web app, and the mounted
+  # weights volume.
+  environment:
+    PYTHONPATH: /app
+    REDIS_URL: redis://redis:6379/0
+    WEB_CALLBACK_URL: http://host.docker.internal:3000
+    WEIGHTS_DIR: /app/weights
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   volumes:
     - ..:/app
     - core_venv:/opt/venv

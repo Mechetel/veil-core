@@ -14,7 +14,9 @@ FROM python:${PYTHON_VERSION}-slim AS base
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/app
+
 
 # Runtime system libraries for torch / pillow / scikit-image + curl for healthcheck.
 RUN apt-get update -qq && \

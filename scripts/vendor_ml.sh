@@ -5,6 +5,10 @@
 #
 # Code only — training runs, datasets and model dumps are excluded (weights are
 # handled separately by collect_weights.py).
+#
+# LOCAL PATCH: steganogan/inference/decoder_service.py uses os.path.basename(...) in
+# its error messages (so the web UI shows 'stego.png', not a temp path). Re-apply
+# after re-vendoring if it gets overwritten.
 set -euo pipefail
 
 SRC="${1:-$HOME/Projects/phd_dissertation/state_3/Attention-Steganogan}"

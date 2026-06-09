@@ -14,16 +14,16 @@ image: mechetel/veil-core
 servers:
   # FastAPI (web role — the default image CMD: uvicorn).
   web:
-    - XXX.XXX.XXX.XXX
+    - CCC.CCC.CCC.CCC
   # Celery worker for the steganography queue (encode/decode, .steg models).
   steg_worker:
     hosts:
-      - XXX.XXX.XXX.XXX
+      - CCC.CCC.CCC.CCC
     cmd: celery -A app.celery_app worker -Q steg -l info
   # Celery worker for the steganalysis queue (analyze, .pt detectors).
   analysis_worker:
     hosts:
-      - XXX.XXX.XXX.XXX
+      - CCC.CCC.CCC.CCC
     cmd: celery -A app.celery_app worker -Q analysis -l info
 
 # SSL + healthcheck for the FastAPI web role.
@@ -48,7 +48,7 @@ env:
     - VEIL_CALLBACK_TOKEN
   clear:
     REDIS_URL: redis://veil-core-redis:6379/0
-    WEB_CALLBACK_URL: https://veil-web.example.com
+    WEB_CALLBACK_URL: http://WWW.WWW.WWW.WWW
     WEIGHTS_DIR: /app/weights
     CUDA: "false"
 
@@ -66,7 +66,7 @@ volumes:
 accessories:
   redis:
     image: redis:7
-    host: XXX.XXX.XXX.XXX
+    host: CCC.CCC.CCC.CCC
     directories:
       - data:/data
 
