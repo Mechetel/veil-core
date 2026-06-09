@@ -1,0 +1,62 @@
+# Steganography models. `weight` is relative to {WEIGHTS_DIR}/steg/.
+# data_depth = bits embedded per pixel (capacity).
+- key: dense-div2k
+  family: dense
+  label: "SteganoGAN Dense (DIV2K)"
+  dataset: div2k
+  data_depth: 1
+  weight: dense-div2k.steg
+- key: edge_unet-div2k
+  family: edge_unet
+  label: "Edge-Guided U-Net (DIV2K)"
+  dataset: div2k
+  data_depth: 1
+  weight: edge_unet-div2k.steg
+- key: edge_aspp-div2k-d1
+  family: edge_aspp
+  label: "Edge-Aware DenseASPP (DIV2K, depth 1)"
+  dataset: div2k
+  data_depth: 1
+  weight: edge_aspp-div2k-d1.steg
+- key: edge_aspp-div2k-d2
+  family: edge_aspp
+  label: "Edge-Aware DenseASPP (DIV2K, depth 2)"
+  dataset: div2k
+  data_depth: 2
+  weight: edge_aspp-div2k-d2.steg
+- key: edge_aspp-div2k-d3
+  family: edge_aspp
+  label: "Edge-Aware DenseASPP (DIV2K, depth 3)"
+  dataset: div2k
+  data_depth: 3
+  weight: edge_aspp-div2k-d3.steg
+- key: edge_aspp-div2k-d4
+  family: edge_aspp
+  label: "Edge-Aware DenseASPP (DIV2K, depth 4)"
+  dataset: div2k
+  data_depth: 4
+  weight: edge_aspp-div2k-d4.steg
+- key: edge_aspp-mscoco-d1
+  family: edge_aspp
+  label: "Edge-Aware DenseASPP (MS-COCO, depth 1)"
+  dataset: mscoco
+  data_depth: 1
+  weight: edge_aspp-mscoco-d1.steg
+- key: edge_aspp-mscoco-d2
+  family: edge_aspp
+  label: "Edge-Aware DenseASPP (MS-COCO, depth 2)"
+  dataset: mscoco
+  data_depth: 2
+  weight: edge_aspp-mscoco-d2.steg
+- key: edge_aspp-mscoco-d3
+  family: edge_aspp
+  label: "Edge-Aware DenseASPP (MS-COCO, depth 3)"
+  dataset: mscoco
+  data_depth: 3
+  weight: edge_aspp-mscoco-d3.steg
+- key: edge_aspp-mscoco-d4
+  family: edge_aspp
+  label: "Edge-Aware DenseASPP (MS-COCO, depth 4)"
+  dataset: mscoco
+  data_depth: 4
+  weight: edge_aspp-mscoco-d4.steg

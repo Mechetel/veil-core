@@ -12,14 +12,28 @@ image: mechetel/veil-core
 
 # Deploy to these servers.
 servers:
+  # FastAPI (web role — the default image CMD: uvicorn).
   web:
-    - XXX.XXX.XXX.XXX
+    - CCC.CCC.CCC.CCC
+  # Celery worker for the steganography queue (encode/decode, .steg models).
+  steg_worker:
+    hosts:
+      - CCC.CCC.CCC.CCC
+    cmd: celery -A app.celery_app worker -Q steg -l info
+  # Celery worker for the steganalysis queue (analyze, .pt detectors).
+  analysis_worker:
+    hosts:
+      - CCC.CCC.CCC.CCC
+    cmd: celery -A app.celery_app worker -Q analysis -l info
 
-# Enable SSL auto certification via Let's Encrypt and configure the healthcheck.
-# proxy:
-#   ssl: true
-#   hosts:
-#     - veil-core.example.com
+# SSL + healthcheck for the FastAPI web role.
+proxy:
+  app_port: 8000
+  healthcheck:
+    path: /up
+  # ssl: true
+  # hosts:
+  #   - veil-core.example.com
 
 # Credentials for your image host.
 registry:
@@ -31,13 +45,34 @@ registry:
 env:
   secret:
     - VEIL_CORE_TOKEN
+    - VEIL_CALLBACK_TOKEN
+  clear:
+    REDIS_URL: redis://veil-core-redis:6379/0
+    WEB_CALLBACK_URL: http://WWW.WWW.WWW.WWW
+    WEIGHTS_DIR: /app/weights
+    CUDA: "false"
 
 # Aliases are triggered with "kamal <alias>".
 aliases:
   logs: app logs -f
   shell: app exec --interactive --reuse "bash"
 
-# Configure the image builder.
+# Persistent weights volume (synced with scripts/sync_weights_to_server.sh).
+# Survives image rebuilds / redeploys; weights are never baked into the image.
+volumes:
+  - "/srv/veil-core/weights:/app/weights"
+
+# Redis broker/result backend for Celery.
+accessories:
+  redis:
+    image: redis:7
+    host: CCC.CCC.CCC.CCC
+    directories:
+      - data:/data
+
+# Configure the image builder. For a GPU build pass TORCH_INDEX=cu121.
 builder:
   arch: amd64
   dockerfile: docker/dockerfiles/prod.Dockerfile
+  # args:
+  #   TORCH_INDEX: cu121

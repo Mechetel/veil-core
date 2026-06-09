@@ -1,35 +1,42 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-# Production image for the Veil Core FastAPI service. Use with Kamal or by hand:
-#   docker build -f docker/dockerfiles/prod.Dockerfile -t veil-core .
-#   docker run -d -p 8000:8000 -e VEIL_CORE_TOKEN=<token> --name veil-core veil-core
+# Production image for veil-core (FastAPI API + Celery workers share this image;
+# the worker roles override the command in config/deploy.yml). Weights are NOT
+# baked in — they are mounted at /app/weights from a persistent volume.
+#
+# CPU build (default):  docker build -f docker/dockerfiles/prod.Dockerfile -t veil-core .
+# GPU build:            ... --build-arg TORCH_INDEX=cu121
 
 ARG PYTHON_VERSION=3.13
 FROM python:${PYTHON_VERSION}-slim AS base
 
-# App lives here
 WORKDIR /app
-
-# Don't write .pyc files; flush stdout/stderr immediately
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/app
 
-# Install curl for container healthchecks
+
+# Runtime system libraries for torch / pillow / scikit-image + curl for healthcheck.
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl && \
+    apt-get install --no-install-recommends -y \
+      curl libjpeg62-turbo zlib1g libgl1 libglib2.0-0 && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Install Python dependencies first for better layer caching
+# Python deps. torch wheel: cpu by default; pass --build-arg TORCH_INDEX=cu121 for GPU.
+ARG TORCH_INDEX=cpu
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt && \
+    pip install torch torchvision --index-url https://download.pytorch.org/whl/${TORCH_INDEX}
 
-# Copy application code
+# Application code + vendored ML packages (needed to unpickle .steg checkpoints).
 COPY app ./app
+COPY steganogan ./steganogan
+COPY steganalyzers ./steganalyzers
 
-# Run as a non-root user for security
-RUN useradd --create-home --uid 1000 veil && \
-    chown -R veil:veil /app
+# Non-root runtime user.
+RUN useradd --create-home --uid 1000 veil && chown -R veil:veil /app
 USER 1000:1000
 
 EXPOSE 8000

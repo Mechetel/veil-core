@@ -1,0 +1,52 @@
+# Steganalyzers. `weight` is relative to {WEIGHTS_DIR}/analyzers/.
+# training = dataset the detector was trained on (stego = our SteganoGAN images).
+- key: efficientnetsteg-stego
+  arch: efficientnetsteg
+  label: "EfficientNet-Steg (SteganoGAN-trained)"
+  training: stego
+  weight: efficientnetsteg-stego.pt
+- key: efficientnetsteg-alaska2
+  arch: efficientnetsteg
+  label: "EfficientNet-Steg (ALASKA2-trained)"
+  training: alaska2
+  weight: efficientnetsteg-alaska2.pt
+- key: srnet-stego
+  arch: srnet
+  label: "SRNet (SteganoGAN-trained)"
+  training: stego
+  weight: srnet-stego.pt
+- key: srnet-alaska2
+  arch: srnet
+  label: "SRNet (ALASKA2-trained)"
+  training: alaska2
+  weight: srnet-alaska2.pt
+- key: xunet-stego
+  arch: xunet
+  label: "XuNet (SteganoGAN-trained)"
+  training: stego
+  weight: xunet-stego.pt
+- key: xunet-alaska2
+  arch: xunet
+  label: "XuNet (ALASKA2-trained)"
+  training: alaska2
+  weight: xunet-alaska2.pt
+- key: yedroudjnet-stego
+  arch: yedroudjnet
+  label: "Yedroudj-Net (SteganoGAN-trained)"
+  training: stego
+  weight: yedroudjnet-stego.pt
+- key: yedroudjnet-alaska2
+  arch: yedroudjnet
+  label: "Yedroudj-Net (ALASKA2-trained)"
+  training: alaska2
+  weight: yedroudjnet-alaska2.pt
+- key: yenet-stego
+  arch: yenet
+  label: "YeNet (SteganoGAN-trained)"
+  training: stego
+  weight: yenet-stego.pt
+- key: yenet-alaska2
+  arch: yenet
+  label: "YeNet (ALASKA2-trained)"
+  training: alaska2
+  weight: yenet-alaska2.pt

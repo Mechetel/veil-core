@@ -1,13 +1,65 @@
+# Local dev stack: Redis + FastAPI (uvicorn --reload) + two Celery workers
+# (steg + analysis queues). Code is bind-mounted; deps install once into the
+# persisted core_venv volume. Run:  docker compose -f docker/dev.yml up
+volumes:
+  core_venv:
+
+x-core: &core
+  build:
+    context: dockerfiles
+    dockerfile: be.Dockerfile
+  image: veil-core-dev
+  env_file:
+    - secret-envs/veil-core.env
+    - envs/core-dev.env
+  # Docker-specific overrides of the localhost dev wiring (take precedence over
+  # env_file): reach redis by service name, the host's web app, and the mounted
+  # weights volume.
+  environment:
+    PYTHONPATH: /app
+    REDIS_URL: redis://redis:6379/0
+    WEB_CALLBACK_URL: http://host.docker.internal:3000
+    WEIGHTS_DIR: /app/weights
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  volumes:
+    - ..:/app
+    - core_venv:/opt/venv
+  depends_on:
+    - redis
+
 services:
+  redis:
+    image: redis:7
+    container_name: veil-core-redis
+    ports:
+      - 6379:6379
+
   core:
-    build:
-      context: dockerfiles
-      dockerfile: be.Dockerfile
+    <<: *core
     container_name: veil-core
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    env_file:
-      - secret-envs/veil-core.env
+    command: >
+      bash -lc "test -x /opt/venv/bin/python || python -m venv /opt/venv;
+      /opt/venv/bin/pip install -q -r requirements.txt &&
+      /opt/venv/bin/pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu &&
+      /opt/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     ports:
       - 8000:8000
-    volumes:
-      - ..:/app
+
+  steg_worker:
+    <<: *core
+    container_name: veil-core-steg-worker
+    command: >
+      bash -lc "test -x /opt/venv/bin/python || python -m venv /opt/venv;
+      /opt/venv/bin/pip install -q -r requirements.txt &&
+      /opt/venv/bin/pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu &&
+      /opt/venv/bin/celery -A app.celery_app worker -Q steg -l info"
+
+  analysis_worker:
+    <<: *core
+    container_name: veil-core-analysis-worker
+    command: >
+      bash -lc "test -x /opt/venv/bin/python || python -m venv /opt/venv;
+      /opt/venv/bin/pip install -q -r requirements.txt &&
+      /opt/venv/bin/pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu &&
+      /opt/venv/bin/celery -A app.celery_app worker -Q analysis -l info"

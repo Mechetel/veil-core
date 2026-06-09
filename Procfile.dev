@@ -1,0 +1,3 @@
+web: PYTHONPATH=. .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+steg: PYTHONPATH=. .venv/bin/celery -A app.celery_app worker -Q steg -l info --concurrency 1
+analysis: PYTHONPATH=. .venv/bin/celery -A app.celery_app worker -Q analysis -l info --concurrency 1
