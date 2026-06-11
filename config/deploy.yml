@@ -32,12 +32,16 @@ servers:
 # If veil-core and veil-web share ONE server, each app must claim a hostname
 # (kamal-proxy routes by Host header and allows only one host-less default app).
 # No domain needed — nip.io resolves for free:  hosts: [veil-core.1.2.3.4.nip.io]
-# proxy:
-#   app_port: 8000
-#   healthcheck: { path: /up }
-#   ssl: true
-#   hosts:
-#     - veil-core.example.com
+#
+# app_port MUST stay set: uvicorn listens on 8000, while kamal-proxy's default
+# is 80 — commenting this out makes the deploy healthcheck fail.
+proxy:
+  app_port: 8000
+  healthcheck:
+    path: /up
+  # ssl: true
+  # hosts:
+  #   - veil-core.example.com
 
 # Credentials for your image host.
 registry:
