@@ -3,7 +3,9 @@
 # dependencies are installed at runtime into a persisted /opt/venv volume (see
 # docker/dev.yml) — mirroring veil-web's be.Dockerfile + be_gems pattern.
 
-ARG PYTHON_VERSION=3.13
+# 3.12 is required: the pinned NumPy 1.26.4 / scikit-image 0.22.0 stack ships no
+# Python 3.13 wheels (pip would fall back to source builds and fail).
+ARG PYTHON_VERSION=3.12
 FROM python:${PYTHON_VERSION}-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

@@ -27,6 +27,11 @@ servers:
     cmd: celery -A app.celery_app worker -Q analysis -l info
 
 # SSL + healthcheck for the FastAPI web role.
+# With no `hosts:` the proxy serves this app for ANY hostname on port 80 —
+# perfect for an IP-only deploy on its own server (http://CORE_IP/...).
+# If veil-core and veil-web share ONE server, each app must claim a hostname
+# (kamal-proxy routes by Host header and allows only one host-less default app).
+# No domain needed — nip.io resolves for free:  hosts: [veil-core.1.2.3.4.nip.io]
 proxy:
   app_port: 8000
   healthcheck:
