@@ -14,16 +14,16 @@ image: mechetel/veil-core
 servers:
   # FastAPI (web role — the default image CMD: uvicorn).
   web:
-    - CCC.CCC.CCC.CCC
+    - 167.233.39.48
   # Celery worker for the steganography queue (encode/decode, .steg models).
   steg_worker:
     hosts:
-      - CCC.CCC.CCC.CCC
+      - 167.233.39.48
     cmd: celery -A app.celery_app worker -Q steg -l info
   # Celery worker for the steganalysis queue (analyze, .pt detectors).
   analysis_worker:
     hosts:
-      - CCC.CCC.CCC.CCC
+      - 167.233.39.48
     cmd: celery -A app.celery_app worker -Q analysis -l info
 
 # SSL + healthcheck for the FastAPI web role.
@@ -32,13 +32,12 @@ servers:
 # If veil-core and veil-web share ONE server, each app must claim a hostname
 # (kamal-proxy routes by Host header and allows only one host-less default app).
 # No domain needed — nip.io resolves for free:  hosts: [veil-core.1.2.3.4.nip.io]
-proxy:
-  app_port: 8000
-  healthcheck:
-    path: /up
-  # ssl: true
-  # hosts:
-  #   - veil-core.example.com
+# proxy:
+#   app_port: 8000
+#   healthcheck: { path: /up }
+#   ssl: true
+#   hosts:
+#     - veil-core.example.com
 
 # Credentials for your image host.
 registry:
@@ -53,7 +52,7 @@ env:
     - VEIL_CALLBACK_TOKEN
   clear:
     REDIS_URL: redis://veil-core-redis:6379/0
-    WEB_CALLBACK_URL: http://WWW.WWW.WWW.WWW
+    WEB_CALLBACK_URL: http://167.233.99.133
     WEIGHTS_DIR: /app/weights
     CUDA: "false"
 
@@ -71,7 +70,7 @@ volumes:
 accessories:
   redis:
     image: redis:7
-    host: CCC.CCC.CCC.CCC
+    host: 167.233.39.48
     directories:
       - data:/data
 
