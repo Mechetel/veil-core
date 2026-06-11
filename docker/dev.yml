@@ -29,12 +29,6 @@ x-core: &core
     - redis
 
 services:
-  redis:
-    image: redis:7
-    container_name: veil-core-redis
-    ports:
-      - 6379:6379
-
   core:
     <<: *core
     container_name: veil-core
@@ -63,3 +57,9 @@ services:
       /opt/venv/bin/pip install -q -r requirements.txt &&
       /opt/venv/bin/pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu &&
       /opt/venv/bin/celery -A app.celery_app worker -Q analysis -l info"
+
+  redis:
+    image: redis:7
+    container_name: veil-core-redis
+    ports:
+      - 6379:6379
