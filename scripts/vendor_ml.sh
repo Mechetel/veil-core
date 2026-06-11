@@ -15,7 +15,7 @@ SRC="${1:-$HOME/Projects/phd_dissertation/state_3/Attention-Steganogan}"
 DEST="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "Vendoring steganogan/ and steganalyzers/ from: $SRC"
-echo "                                          into: $DEST"
+echo "                                         into: $DEST"
 
 common_excludes=(
   --exclude '__pycache__/'
