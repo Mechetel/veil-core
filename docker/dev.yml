@@ -1,6 +1,15 @@
 # Local dev stack: Redis + FastAPI (uvicorn --reload) + two Celery workers
 # (steg + analysis queues). Code is bind-mounted; deps install once into the
 # persisted core_venv volume. Run:  docker compose -f docker/dev.yml up
+#
+# Only the `core` service installs Python deps — three containers pip-installing
+# into the same venv volume concurrently can corrupt it. core touches
+# /opt/venv/.ready when done; the workers wait for that sentinel before starting.
+#
+# Explicit project name: without it compose derives the name from this file's
+# directory ("docker") and collides with veil-web's dev stack.
+name: veil-core
+
 volumes:
   core_venv:
 
@@ -29,19 +38,17 @@ x-core: &core
     - redis
 
 services:
-  redis:
-    image: redis:7
-    container_name: veil-core-redis
-    ports:
-      - 6379:6379
-
   core:
     <<: *core
     container_name: veil-core
+    # The venv guard checks that pip actually IMPORTS (not just that python
+    # exists): an interrupted first boot leaves a half-built venv, which
+    # `venv --clear` then rebuilds from scratch.
     command: >
-      bash -lc "test -x /opt/venv/bin/python || python -m venv /opt/venv;
+      bash -lc "/opt/venv/bin/python -m pip --version >/dev/null 2>&1 || python -m venv --clear /opt/venv;
       /opt/venv/bin/pip install -q -r requirements.txt &&
       /opt/venv/bin/pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu &&
+      touch /opt/venv/.ready &&
       /opt/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     ports:
       - 8000:8000
@@ -49,17 +56,28 @@ services:
   steg_worker:
     <<: *core
     container_name: veil-core-steg-worker
+    depends_on:
+      - redis
+      - core
     command: >
-      bash -lc "test -x /opt/venv/bin/python || python -m venv /opt/venv;
-      /opt/venv/bin/pip install -q -r requirements.txt &&
-      /opt/venv/bin/pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu &&
-      /opt/venv/bin/celery -A app.celery_app worker -Q steg -l info"
+      bash -lc "echo 'waiting for core to install deps (/opt/venv/.ready)...';
+      until [ -f /opt/venv/.ready ]; do sleep 2; done;
+      exec /opt/venv/bin/celery -A app.celery_app worker -Q steg -l info"
 
   analysis_worker:
     <<: *core
     container_name: veil-core-analysis-worker
+    depends_on:
+      - redis
+      - core
     command: >
-      bash -lc "test -x /opt/venv/bin/python || python -m venv /opt/venv;
-      /opt/venv/bin/pip install -q -r requirements.txt &&
-      /opt/venv/bin/pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu &&
-      /opt/venv/bin/celery -A app.celery_app worker -Q analysis -l info"
+      bash -lc "echo 'waiting for core to install deps (/opt/venv/.ready)...';
+      until [ -f /opt/venv/.ready ]; do sleep 2; done;
+      exec /opt/venv/bin/celery -A app.celery_app worker -Q analysis -l info"
+
+  redis:
+    image: redis:7
+    container_name: veil-core-redis
+    # No host port: the stack reaches it as redis://redis:6379 on the compose
+    # network, and a host mapping would clash with a local (brew) redis on 6379.
+    # Debug from outside: docker exec -it veil-core-redis redis-cli
